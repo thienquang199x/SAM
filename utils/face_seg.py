@@ -2,7 +2,6 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.platform import gfile
 
 
 curPath = os.path.abspath(os.path.dirname(__file__))
@@ -10,10 +9,10 @@ curPath = os.path.abspath(os.path.dirname(__file__))
 
 class FaceSeg:
     def __init__(self, model_path=os.path.join(curPath, 'seg_model_384.pb')):
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         self._graph = tf.Graph()
-        self._sess = tf.Session(config=config, graph=self._graph)
+        self._sess = tf.compat.v1.Session(config=config, graph=self._graph)
 
         self.pb_file_path = model_path
         self._restore_from_pb()
@@ -23,8 +22,8 @@ class FaceSeg:
     def _restore_from_pb(self):
         with self._sess.as_default():
             with self._graph.as_default():
-                with gfile.FastGFile(self.pb_file_path, 'rb') as f:
-                    graph_def = tf.GraphDef()
+                with tf.gfile.GFile(self.pb_file_path, 'rb') as f:
+                    graph_def = tf.compat.v1.GraphDef()
                     graph_def.ParseFromString(f.read())
                     tf.import_graph_def(graph_def, name='')
 
